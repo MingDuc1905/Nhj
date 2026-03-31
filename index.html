@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="white">
+    <meta name="theme-color" content="#ffffff">
+    <title>thư gửi Nhi 💌</title>
+    <!-- Font chữ viết tay cho giống nội dung thư thật -->
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500;700&display=swap" rel="stylesheet">
+    <!-- Thư viện Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            /* Fullscreen trắng tinh khôi như yêu cầu mới */
+            background-color: #FFFFFF;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden; /* Xóa bỏ thanh cuộn */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        /* Màn hình 1: Phong bì */
+        #intro-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            width: 100vw;
+            height: 100vh;
+            z-index: 10;
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .envelope-img {
+            width: 180px;
+            height: auto;
+            cursor: pointer;
+            filter: drop-shadow(0px 10px 15px rgba(0,0,0,0.1));
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .hint-text {
+            margin-top: 20px;
+            font-family: 'Dancing Script', cursive;
+            font-size: 24px;
+            color: #555;
+            animation: pulse-text 1.5s infinite;
+        }
+
+        @keyframes pulse-text {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+
+        /* Màn hình 2: Lá thư */
+        #letter-screen {
+            /* Giấy nền hơi kem nhẹ */
+            background-color: #FFFDF9;
+            width: 90%;
+            max-width: 400px;
+            padding: 40px 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            position: absolute;
+            z-index: 20;
+
+            /* Trạng thái ẩn ban đầu */
+            opacity: 0;
+            transform: translateY(50px) scale(0.9);
+            pointer-events: none;
+            transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #letter-screen.visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
+        }
+
+        .letter-content {
+            font-family: 'Dancing Script', cursive;
+            font-size: 26px; /* Chữ to xíu cho dễ đọc trên điện thoại */
+            color: #333;
+            line-height: 1.6;
+            width: 100%;
+            white-space: pre-wrap; /* Giữ nguyên các dấu xuống dòng của nội dung gốc */
+            text-align: left;
+        }
+
+        /* Nút Hẹn gặp */
+        #action-btn {
+            background-color: #FF4081; /* Màu hồng lãng mạn */
+            color: #FFFFFF;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 30px;
+            font-size: 22px;
+            font-weight: 600;
+            font-family: 'Dancing Script', cursive;
+            cursor: pointer;
+            margin-top: 30px;
+            width: 100%;
+            box-shadow: 0 5px 15px rgba(255, 64, 129, 0.3);
+            transition: transform 0.2s ease, background-color 0.3s ease;
+            
+            /* Ẩn ban đầu, chỉ hiện sau khi thư trượt ra */
+            opacity: 0;
+            transform: scale(0.9);
+            visibility: hidden;
+        }
+
+        #action-btn.show-btn {
+            visibility: visible;
+            opacity: 1;
+            transform: scale(1);
+            transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition-delay: 0.5s; /* Đợi thư bay lên rồi mới nổi nút */
+        }
+
+        #action-btn:active {
+            transform: scale(0.95);
+            background-color: #D81B60;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Màn hình 1: Bìa thư (Đám mây) & Wojak -->
+    <div id="intro-screen">
+        <!-- Đám mây trung tâm như yêu cầu -->
+        <div style="font-size: 150px; cursor: pointer; user-select: none; animation: float 3s ease-in-out infinite; text-shadow: 0px 10px 15px rgba(0,0,0,0.1); z-index: 10;" id="envelope-btn">☁️</div>
+        <p class="hint-text" style="z-index: 10;">CHẠM VÔ NHANH LÊN</p>
+    </div>
+
+    <!-- Màn hình 2: Nội dung thư -->
+    <div id="letter-screen">
+        <div id="text-container" class="letter-content">Dear eim Nhi,
+toi mời em Nhi đi chơi với toi vào ngày 3/3/2026. tức ngày 16 âm lịch, toi sẽ đón em lúc 7h, sau đó sẽ tới mall ăn gogi, xong rồi sẽ đi lượn. Toi yêu cầu em Nhi chuẩn bị đầy đủ tươm tất, vì toi ghét trễ giờ, và sẵn sàng đón những thứ bất ngờ
+tks, arigamel</div>
+        <button id="action-btn">ko sủi  </button>
+    </div>
+
+    <!-- Không còn div wojak riêng lẻ -->
+
+    <script>
+        const introScreen = document.getElementById('intro-screen');
+        const envelopeBtn = document.getElementById('envelope-btn');
+        const letterScreen = document.getElementById('letter-screen');
+        const actionBtn = document.getElementById('action-btn');
+
+        // Mở thư
+        envelopeBtn.addEventListener('click', () => {
+            // Hiệu ứng mở mượt mà
+            introScreen.style.transform = 'scale(0.8) translateY(-50px)';
+            introScreen.style.opacity = '0';
+            
+            setTimeout(() => {
+                introScreen.style.display = 'none';
+                letterScreen.classList.add('visible'); // Trượt tờ giấy ra
+                actionBtn.classList.add('show-btn'); // Nổi nút bấm lên
+            }, 800);
+        });
+
+        // Hàm bắn pháo hoa trái tim
+        function fireHeartConfetti() {
+            var duration = 3000;
+            var end = Date.now() + duration;
+
+            (function frame() {
+                // Tạo confetti với pattern trái tim màu hồng
+                confetti({
+                    particleCount: 7,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 },
+                    colors: ['#FFC0CB', '#FF69B4', '#FF1493'],
+                    shapes: ['heart'],
+                    scalar: 2
+                });
+                confetti({
+                    particleCount: 7,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 },
+                    colors: ['#FFC0CB', '#FF69B4', '#FF1493'],
+                    shapes: ['heart'],
+                    scalar: 2
+                });
+
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                }
+            }());
+        }
+
+        // Sự kiện Bấm nút Hẹn Gặp
+        actionBtn.addEventListener('click', () => {
+            actionBtn.innerText = "chốt ";
+            actionBtn.style.backgroundColor = "#C2185B";
+            fireHeartConfetti();
+        });
+    </script>
+</body>
+</html>
