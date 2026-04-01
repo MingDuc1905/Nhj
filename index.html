@@ -144,9 +144,40 @@
             transform: scale(0.95);
             background-color: #D81B60;
         }
+
+        /* ========================================== */
+        /* BẮT ĐẦU CSS CHO MEME */
+        
+        .meme {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: clamp(300px, 50vw, 700px);
+            height: auto;
+            z-index: 9999;
+            pointer-events: none; /* Tránh chặn thao tác click */
+            transition: all 0.6s ease-in-out;
+            /* Đã xóa animation để giữ ảnh đứng yên hoàn toàn */
+        }
+
+        .meme.fade-out {
+            opacity: 0;
+            transform: translateX(-50%) translateY(40px) scale(0.95);
+            filter: blur(4px);
+        }
+        
+        /* KẾT THÚC CSS CHO MEME */
+        /* ========================================== */
     </style>
 </head>
 <body>
+
+    <!-- ========================================== -->
+    <!-- BẮT ĐẦU PHẦN THÊM MEME -->
+    <img src="e550bf2c-8602-4488-adc2-d1eecddf1cfa-removebg-preview.png" class="meme" alt="meme">
+    <!-- KẾT THÚC PHẦN THÊM MEME -->
+    <!-- ========================================== -->
 
     <!-- Màn hình 1: Bìa thư (Đám mây) & Wojak -->
     <div id="intro-screen">
@@ -173,6 +204,20 @@ tks, arigamel</div>
 
         // Mở thư
         envelopeBtn.addEventListener('click', () => {
+            // ==========================================
+            // BẮT ĐẦU: XỬ LÝ FADE-OUT CHO MEME
+            const meme = document.querySelector('.meme');
+            if (meme) {
+                meme.classList.add('fade-out');
+                
+                // Ẩn hẳn (display: none) sau khi animation 0.6s kết thúc
+                setTimeout(() => {
+                    meme.style.display = 'none';
+                }, 600);
+            }
+            // KẾT THÚC: XỬ LÝ FADE-OUT CHO MEME
+            // ==========================================
+
             // Hiệu ứng mở mượt mà
             introScreen.style.transform = 'scale(0.8) translateY(-50px)';
             introScreen.style.opacity = '0';
